@@ -9,7 +9,7 @@
 #     Ui.setupUi(MainWindow)
 #     MainWindow.show()
 #     sys.exit(app.exec_())
-
+import os.path
 
 # from core.icacls import AclSupport
 #
@@ -19,4 +19,14 @@
 # # acls.deep_walk(walks=walks, path=paths, depthLevel=3)
 # print(walks)
 
+from core.icacls import  AclSupport
+from core.xlsx import Aclmat
 
+acl = AclSupport()
+result = acl.list_acl("D:\\共享测试", 1)
+
+xlsx = Aclmat()
+xlsx.AuthsExport(result, "D:\\HztvProjects\\WACL\\test.xlsx")
+
+
+print(result)
