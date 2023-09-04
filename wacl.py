@@ -23,10 +23,10 @@ from core.icacls import  AclSupport
 from core.xlsx import Aclmat
 
 acl = AclSupport()
-result = acl.list_acl("D:\\共享测试", 1)
+result = acl.list_acl("T:\\", 1)
 
 xlsx = Aclmat()
-xlsx.AuthsExport(result, "D:\\HztvProjects\\WACL\\test.xlsx")
+xlsx.AuthsExport(result, "D:\\WACL\\t.xlsx")
 
 
-print(result)
+# print(result)

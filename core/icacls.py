@@ -154,6 +154,10 @@ class AclSupport:
         """
         if not os.path.exists(path):
             return {4004: ['query path not exists, please try again', '查询路径不存在，请重新输入', 'get_autority']}
+
+        if '$RECYCLE.BIN' in path:
+            return {}
+
         computerName = os.environ.get('computername')
 
         auth_id = 0

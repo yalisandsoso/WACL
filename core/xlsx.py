@@ -55,6 +55,33 @@ class Aclmat:
 
         return _map
 
+    def get_per_map(self):
+        """
+            The specific contents in the advanced security settings of the folder.
+        """
+        _map = {}
+        if self.lang == 'ch':
+            _map = {
+                'isAllow': '是否允许的权限',
+                'fullControl': '完全控制',
+                'readData_listDir': '列出文件夹/读取数据',
+                'readAttr': '读取属性',
+                'readExtAttr': '读取扩展属性',
+                'readPermiss': '读取权限',
+                'execute_traverse': '遍历文件夹/执行文件',
+                'writeData_addFile': '创建文件/写入数据',
+                'appendData_addSubdir': '创建文件夹/附加数据',
+                'writeAttr': '写入属性',
+                'writeExtAttr': '写入扩展属性',
+                'delete': '删除',
+                'deleteChild': '删除子文件夹及文件',
+                'changePermiss': '更改权限',
+                'takeOwner': '取得所有权',
+                'sync': '同步'
+            }
+
+        return _map
+
     def get_inheritRight_int_map(self):
         """
             The permissions applied.
@@ -122,7 +149,7 @@ class Aclmat:
         if not acl_map or not output:
             return False
 
-        self.__W2Xlsx__(acl_map, output)
+        self.__W2Xlsx2__(acl_map, output)
 
         return True
 
@@ -255,4 +282,164 @@ class Aclmat:
                     ws_cell.value = "\u2714"
 
         wb.save(output)
+        return True
+
+    def __W2Xlsx2__(self, acl_map: dict, output: str, *args, **kwargs):
+        """
+                Write the ACL contents to the .xlsx FILE.
+        :param acl_map:   {path: {'accessState': auths_list, 'subDirs': auth_subDirs, 'subFiles': auth_subFiles,'count_result': [auth_usersList]}}
+        :param output:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+
+        wb = Workbook()
+        ws = wb.active
+
+        user_group = []
+        path_group = []
+
+        for p, v in acl_map.items():
+            if p not in path_group:
+                path_group.append(p)
+            for access_ in v['accessState']:
+                if access_['user'] not in user_group:
+                    user_group.append(access_['user'])
+
+        print("user_group: ", user_group)
+        print("path_group: ", path_group)
+
+        # view
+        ws.views.sheetView[0].showGridLines = False
+        ws.title = "Windows ACL Perm2."
+
+        num_title_columns = len(user_group) * 2 + 2
+        num_title_rows = 3
+
+        ws.merge_cells('A1:A3')
+        ws['A1'].value = 'Path'
+        ws.merge_cells('{}1:{}1'.format(get_column_letter(2),get_column_letter(num_title_columns-1)))
+        ws['B1'].value = 'User Group'
+        ws.merge_cells('{}1:{}3'.format(get_column_letter(num_title_columns),get_column_letter(num_title_columns)))
+        ws['{}1'.format(get_column_letter(num_title_columns))].value = 'Permission'
+
+        j = 0
+        for i in range(len(user_group)):
+            c = get_column_letter(j+2)
+            r = get_column_letter(j+3)
+            j = j + 2
+            ws.merge_cells('{}2:{}2'.format(c,r))
+            ws[c+'2'].value = str(user_group[i])
+            ws[c+'3'].value = '授予'
+            ws[r+'3'].value = '拒绝'
+
+        # row 4
+        # 保存需要填入信息的
+        j = 4
+        for i in range(len(path_group)):
+            e = j + 16
+            ws.merge_cells('A{}:A{}'.format(j,e))
+            ws['A' + str(j)].value = path_group[i]
+
+            # for all columns
+            # for l in range(2,num_title_columns-1):
+            #     col_index = get_column_letter(l)
+            #     ws.merge_cells('{}{}:{}{}'.format(col_index,j,col_index,e))
+
+            # 权限信息详细
+            item = 0
+            for k in range(j,e):
+                ws['{}'.format(get_column_letter(num_title_columns)) + str(k)].value = list(self.get_per_map().values())[item]
+                item += 1
+
+            # 填入具体信息
+            vi = acl_map[path_group[i]]
+            if vi['accessState'] == '拒绝访问':
+                # 该路径无法获取任何权限信息
+                pass
+            else:
+                for perm in vi['accessState']:
+                    usr_idx  = user_group.index(perm['user'])
+                    col_idx = get_column_letter(usr_idx*2+2)
+                    col_idx2 = get_column_letter(usr_idx*2+2+1)
+
+                    self.__fill_ws__(perm, col_idx, col_idx2, ws, 'isAllow', j)
+                    self.__fill_ws__(perm, col_idx, col_idx2, ws, 'fullControl', j+1)
+                    self.__fill_ws__(perm, col_idx, col_idx2, ws, 'readData_listDir', j+2)
+                    self.__fill_ws__(perm, col_idx, col_idx2, ws, 'readAttr', j+3)
+                    self.__fill_ws__(perm, col_idx, col_idx2, ws, 'readExtAttr', j+4)
+                    self.__fill_ws__(perm, col_idx, col_idx2, ws, 'readPermiss', j+5)
+                    self.__fill_ws__(perm, col_idx, col_idx2, ws, 'execute_traverse', j+6)
+                    self.__fill_ws__(perm, col_idx, col_idx2, ws, 'writeData_addFile', j+7)
+                    self.__fill_ws__(perm, col_idx, col_idx2, ws, 'appendData_addSubdir', j+8)
+                    self.__fill_ws__(perm, col_idx, col_idx2, ws, 'writeAttr', j+9)
+                    self.__fill_ws__(perm, col_idx, col_idx2, ws, 'writeExtAttr', j+10)
+                    self.__fill_ws__(perm, col_idx, col_idx2, ws, 'delete', j+11)
+                    self.__fill_ws__(perm, col_idx, col_idx2, ws, 'deleteChild', j+12)
+                    self.__fill_ws__(perm, col_idx, col_idx2, ws, 'changePermiss', j+13)
+                    self.__fill_ws__(perm, col_idx, col_idx2, ws, 'takeOwner', j+14)
+                    self.__fill_ws__(perm, col_idx, col_idx2, ws, 'sync', j+15)
+
+                    authorized_ = ""
+                    refuse_ = ""
+
+                    authorized_ += '(%s)' % str.join(',', perm['accessMask'])
+                    if perm['parentInherit'] == 1:
+                        authorized_ += "\n, 从父对象继承"
+                    else:
+                        refuse_ += "不从父对象继承"
+
+                    if perm['propagateInherit'] == 1:
+                        authorized_ += "\n, 传播继承"
+                    else:
+                        refuse_ += "\n, 不传播继承"
+
+                    authorized_ += "\n, " + [v for k, v in self.get_inheritRight_int_map().items() if str(perm['inheritRight']) == str(k)][0]
+
+                    ws[col_idx + str(j+16)].value = authorized_
+                    ws[col_idx2 + str(j+16)].value = refuse_
+
+                    ws.column_dimensions[col_idx].width = 30
+                    ws.column_dimensions[col_idx2].width = 30
+                    ws.row_dimensions[j+16].height = 60
+
+            j = j + 17
+
+        all_rows = len(path_group) * 17 + 3
+
+        side = Side(
+            style=borders.BORDER_THIN,
+            color=colors.BLACK,
+        )
+
+        # 水平垂直居中
+        for row in ws['A1:{}{}'.format(get_column_letter(num_title_columns),all_rows)]:
+            for cell in row:
+                cell.alignment = Alignment(horizontal='center', vertical='center')
+                cell.border = Border(
+                    top=side,
+                    bottom=side,
+                    left=side,
+                    right=side
+                )
+
+        # 设置列宽
+        # 计算当前列所有字符串的长度
+        cols_len = [len(v) for v in path_group]
+        max_column = max(cols_len)
+
+        max_col_len = max_column * 2
+        ws.column_dimensions[get_column_letter(1)].width = max_col_len + 2
+        ws.column_dimensions[get_column_letter(num_title_columns)].width = 20 + 2
+
+
+        wb.save(output)
+        return True
+
+    def __fill_ws__(self, perm: list, col_idx: str, col_idx2: str, ws: Workbook, widx: str, rowj: int):
+        if perm[widx] == 1:
+            ws['{}'.format(col_idx) + str(rowj)] = "\u2714"
+        else:
+            ws['{}'.format(col_idx2) + str(rowj)] = "\u2714"
         return True
