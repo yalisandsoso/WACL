@@ -29,4 +29,5 @@ xlsx = Aclmat()
 xlsx.AuthsExport(result, "D:\\WACL\\t.xlsx")
 
 
-# print(result)
+# print(result["T:"])
+print("TODO: 视图-冻结窗格")

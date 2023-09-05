@@ -255,6 +255,21 @@ class AclSupport:
                         auth_special_takeOwner = 1 if len([v for v in auth_accessMask if 'WO' == v]) == 1 else 0
                         auth_special_sync = 1 if len([v for v in auth_accessMask if 'S' == v]) == 1 else 0
 
+                    if (auth_simple_modify == 0 and auth_simple_read_execute == 0 and auth_simple_read_only == 0 and auth_simple_write_only == 0 \
+                        and auth_special_readData_listDir == 0 and  auth_special_readAttr == 0 and auth_special_readExtAttr == 0 \
+                        and auth_special_readPermiss == 0 and auth_special_execute_traverse == 0 and auth_special_writeData_addFile == 0 \
+                        and auth_special_appendData_addSubdir == 0 and auth_special_writeAttr == 0 and auth_special_writeExtAttr == 0 \
+                        and auth_special_delete == 0 and auth_special_deleteChild == 0 and auth_special_changePermiss == 0 and auth_special_takeOwner == 0 and auth_special_sync == 0):
+                        auth_fullControl = 0
+                    elif (auth_simple_modify == 1 and auth_simple_read_execute == 1 and auth_simple_read_only == 1 and auth_simple_write_only == 1 \
+                        and auth_special_readData_listDir == 1 and  auth_special_readAttr == 1 and auth_special_readExtAttr == 1 \
+                        and auth_special_readPermiss == 1 and auth_special_execute_traverse == 1 and auth_special_writeData_addFile == 1 \
+                        and auth_special_appendData_addSubdir == 1 and auth_special_writeAttr == 1 and auth_special_writeExtAttr == 1 \
+                        and auth_special_delete == 1 and auth_special_deleteChild == 1 and auth_special_changePermiss == 1 and auth_special_takeOwner == 1 and auth_special_sync == 1):
+                        auth_fullControl = 1
+                    else:
+                        auth_fullControl = -1
+
                     auths_list.append({
                         'id': auth_id,
                         'alias': auth_alias,

@@ -276,7 +276,7 @@ class Aclmat:
             for col in range(10, ws.max_column + 1):
                 ws_cell = ws[get_column_letter(col) + str(row)]
 
-                if ws_cell.value == '0':
+                if ws_cell.value == '0' or ws_cell.value == '-1':
                     ws_cell.value = "\u274C"
                 elif ws_cell.value == '1':
                     ws_cell.value = "\u2714"
@@ -313,18 +313,28 @@ class Aclmat:
         # view
         ws.views.sheetView[0].showGridLines = False
         ws.title = "Windows ACL Perm2."
+        ws.row_dimensions[2].height = 20
+
+        # font
+        font_consolas = Font(name="Consolas",size=11,bold=True,italic=False,color="00000000")
+        font_black = Font(name="黑体",size=8,bold=True,italic=False,color="00000000")
+        font_kai = Font(name="楷体",size=8,bold=False,italic=False,color="00000000")
+
+        # color fill
+        fille2 = PatternFill('solid', fgColor='00FF6600')
 
         num_title_columns = len(user_group) * 2 + 2
         num_title_rows = 3
 
         ws.merge_cells('A1:A3')
         ws['A1'].value = 'Path'
-        ws.merge_cells('{}1:{}1'.format(get_column_letter(2),get_column_letter(num_title_columns-1)))
-        ws['B1'].value = 'User Group'
-        ws.merge_cells('{}1:{}3'.format(get_column_letter(num_title_columns),get_column_letter(num_title_columns)))
-        ws['{}1'.format(get_column_letter(num_title_columns))].value = 'Permission'
+        ws.merge_cells('B1:B3')
+        ws['B1'].value = 'Permission'
+        ws.merge_cells('{}1:{}1'.format(get_column_letter(3),get_column_letter(num_title_columns)))
+        ws['C1'].value = 'User Group'
 
-        j = 0
+        # col 3
+        j = 1
         for i in range(len(user_group)):
             c = get_column_letter(j+2)
             r = get_column_letter(j+3)
@@ -336,6 +346,7 @@ class Aclmat:
 
         # row 4
         # 保存需要填入信息的
+        wrap_true_list = [2]
         j = 4
         for i in range(len(path_group)):
             e = j + 16
@@ -350,7 +361,7 @@ class Aclmat:
             # 权限信息详细
             item = 0
             for k in range(j,e):
-                ws['{}'.format(get_column_letter(num_title_columns)) + str(k)].value = list(self.get_per_map().values())[item]
+                ws['B' + str(k)].value = list(self.get_per_map().values())[item]
                 item += 1
 
             # 填入具体信息
@@ -361,8 +372,8 @@ class Aclmat:
             else:
                 for perm in vi['accessState']:
                     usr_idx  = user_group.index(perm['user'])
-                    col_idx = get_column_letter(usr_idx*2+2)
-                    col_idx2 = get_column_letter(usr_idx*2+2+1)
+                    col_idx = get_column_letter(usr_idx*2+3)
+                    col_idx2 = get_column_letter(usr_idx*2+3+1)
 
                     self.__fill_ws__(perm, col_idx, col_idx2, ws, 'isAllow', j)
                     self.__fill_ws__(perm, col_idx, col_idx2, ws, 'fullControl', j+1)
@@ -399,10 +410,14 @@ class Aclmat:
 
                     ws[col_idx + str(j+16)].value = authorized_
                     ws[col_idx2 + str(j+16)].value = refuse_
+                    ws[col_idx + str(j+16)].font = font_black
+                    ws[col_idx2 + str(j+16)].font = font_kai
 
-                    ws.column_dimensions[col_idx].width = 30
-                    ws.column_dimensions[col_idx2].width = 30
-                    ws.row_dimensions[j+16].height = 60
+                    ws.column_dimensions[col_idx].width = 10
+                    ws.column_dimensions[col_idx2].width = 10
+                    ws.row_dimensions[j+16].height = 88
+
+                    wrap_true_list.append(j+16)
 
             j = j + 17
 
@@ -424,22 +439,33 @@ class Aclmat:
                     right=side
                 )
 
+        # 设置行自动换行
+        for row_numb in wrap_true_list:
+            for cell in ws[row_numb]:
+                cell.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+
+        for i in range(4, all_rows):
+            ws['A'+str(i)].alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+
+        # 冻结窗口
+        ws.freeze_panes = "C4"
+
         # 设置列宽
         # 计算当前列所有字符串的长度
-        cols_len = [len(v) for v in path_group]
-        max_column = max(cols_len)
-
-        max_col_len = max_column * 2
-        ws.column_dimensions[get_column_letter(1)].width = max_col_len + 2
-        ws.column_dimensions[get_column_letter(num_title_columns)].width = 20 + 2
-
+        #cols_len = [len(v) for v in path_group]
+        #max_column = max(cols_len)
+        #max_col_len = max_column * 2
+        ws.column_dimensions[get_column_letter(1)].width = 12 + 2
+        ws.column_dimensions[get_column_letter(2)].width = 20 + 2
 
         wb.save(output)
         return True
 
     def __fill_ws__(self, perm: list, col_idx: str, col_idx2: str, ws: Workbook, widx: str, rowj: int):
+        color_fill = PatternFill('solid', fgColor='0000FF00')
         if perm[widx] == 1:
             ws['{}'.format(col_idx) + str(rowj)] = "\u2714"
-        else:
+            ws['{}'.format(col_idx) + str(rowj)].fill = color_fill
+        elif perm[widx] == 0:
             ws['{}'.format(col_idx2) + str(rowj)] = "\u2714"
         return True
