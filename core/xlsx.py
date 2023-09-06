@@ -318,10 +318,11 @@ class Aclmat:
         # font
         font_consolas = Font(name="Consolas",size=11,bold=True,italic=False,color="00000000")
         font_black = Font(name="黑体",size=8,bold=True,italic=False,color="00000000")
-        font_kai = Font(name="楷体",size=8,bold=False,italic=False,color="00000000")
+        font_kai = Font(name="楷体",size=8,bold=True,italic=False,color="00000000")
 
         # color fill
-        fille2 = PatternFill('solid', fgColor='00FF6600')
+        fille = PatternFill('solid', fgColor='00CCFFCC')
+        fille2 = PatternFill('solid', fgColor='00FF0000')
 
         num_title_columns = len(user_group) * 2 + 2
         num_title_rows = 3
@@ -394,24 +395,36 @@ class Aclmat:
 
                     authorized_ = ""
                     refuse_ = ""
+                    temp_ = ""
 
-                    authorized_ += '(%s)' % str.join(',', perm['accessMask'])
                     if perm['parentInherit'] == 1:
-                        authorized_ += "\n, 从父对象继承"
+                        temp_ += "\n* 从父对象继承"
                     else:
-                        refuse_ += "不从父对象继承"
+                        temp_ += "\n* 不从父对象继承"
 
                     if perm['propagateInherit'] == 1:
-                        authorized_ += "\n, 传播继承"
+                        temp_ += "\n* 传播继承"
                     else:
-                        refuse_ += "\n, 不传播继承"
+                        temp_ += "\n* 不传播继承"
 
-                    authorized_ += "\n, " + [v for k, v in self.get_inheritRight_int_map().items() if str(perm['inheritRight']) == str(k)][0]
+                    temp_ += "\n* " + [v for k, v in self.get_inheritRight_int_map().items() if str(perm['inheritRight']) == str(k)][0]
+
+                    if "(DENY)" not in perm['accessMask'] and "(N)" not in perm['accessMask']:
+                        authorized_ += '(%s)' % str.join(',', perm['accessMask'])
+                        authorized_ += temp_
+                    else:
+                        refuse_ += '(%s)' % str.join(',', perm['accessMask'])
+                        refuse_ += temp_
 
                     ws[col_idx + str(j+16)].value = authorized_
                     ws[col_idx2 + str(j+16)].value = refuse_
                     ws[col_idx + str(j+16)].font = font_black
                     ws[col_idx2 + str(j+16)].font = font_kai
+
+                    if refuse_ != "":
+                        ws[col_idx2 + str(j+16)].fill = fille2
+                    elif authorized_ != "":
+                        ws[col_idx + str(j+16)].fill = fille
 
                     ws.column_dimensions[col_idx].width = 10
                     ws.column_dimensions[col_idx2].width = 10
@@ -463,9 +476,11 @@ class Aclmat:
 
     def __fill_ws__(self, perm: list, col_idx: str, col_idx2: str, ws: Workbook, widx: str, rowj: int):
         color_fill = PatternFill('solid', fgColor='0000FF00')
+        color_fill2 = PatternFill('solid', fgColor='00808080')
         if perm[widx] == 1:
             ws['{}'.format(col_idx) + str(rowj)] = "\u2714"
             ws['{}'.format(col_idx) + str(rowj)].fill = color_fill
         elif perm[widx] == 0:
             ws['{}'.format(col_idx2) + str(rowj)] = "\u2714"
+            ws['{}'.format(col_idx2) + str(rowj)].fill = color_fill2
         return True
