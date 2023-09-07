@@ -9,25 +9,9 @@
 #     Ui.setupUi(MainWindow)
 #     MainWindow.show()
 #     sys.exit(app.exec_())
-import os.path
 
-# from core.icacls import AclSupport
-#
-# walks = []
-# paths = "D:\\共享测试"
-# acls = AclSupport()
-# # acls.deep_walk(walks=walks, path=paths, depthLevel=3)
-# print(walks)
+from sample import test
 
-from core.icacls import  AclSupport
-from core.xlsx import Aclmat
+if __name__ == "__main__":
+    test.test_save_excel_PER2()
 
-acl = AclSupport()
-result = acl.list_acl("T:\\", 1)
-
-xlsx = Aclmat()
-xlsx.AuthsExport(result, "D:\\WACL\\t.xlsx")
-
-
-# print(result["T:"])
-print("TODO: 视图-冻结窗格")

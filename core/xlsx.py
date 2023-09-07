@@ -144,12 +144,15 @@ class Aclmat:
 
         return _map
 
-    def AuthsExport(self, acl_map: dict, output: str, *args, **kwargs):
+    def AuthsExport(self, acl_map: dict, output: str, mode: int, *args, **kwargs):
 
         if not acl_map or not output:
             return False
 
-        self.__W2Xlsx2__(acl_map, output)
+        if mode == 1:
+            self.__W2Xlsx__(acl_map, output)
+        elif mode == 2:
+            self.__W2Xlsx2__(acl_map, output)
 
         return True
 
@@ -307,8 +310,8 @@ class Aclmat:
                 if access_['user'] not in user_group:
                     user_group.append(access_['user'])
 
-        print("user_group: ", user_group)
-        print("path_group: ", path_group)
+        # print("user_group: ", user_group)
+        # print("path_group: ", path_group)
 
         # view
         ws.views.sheetView[0].showGridLines = False
@@ -475,8 +478,8 @@ class Aclmat:
         return True
 
     def __fill_ws__(self, perm: list, col_idx: str, col_idx2: str, ws: Workbook, widx: str, rowj: int):
-        color_fill = PatternFill('solid', fgColor='0000FF00')
-        color_fill2 = PatternFill('solid', fgColor='00808080')
+        color_fill = PatternFill('solid', fgColor='00CCFFCC')
+        color_fill2 = PatternFill('solid', fgColor='00CCFFFF')
         if perm[widx] == 1:
             ws['{}'.format(col_idx) + str(rowj)] = "\u2714"
             ws['{}'.format(col_idx) + str(rowj)].fill = color_fill
