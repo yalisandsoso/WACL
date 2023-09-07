@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-from core.xlsx import Aclmat
-from core.icacls import AclSupport
+from WACL.core.xlsx import Aclmat
+from WACL.core.icacls import AclSupport
 
 class AclGt:
     _aclmat = Aclmat()

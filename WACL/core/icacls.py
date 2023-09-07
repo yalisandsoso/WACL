@@ -1,7 +1,6 @@
 import os
 import re
 
-
 class AclSupport:
     """
         Support the operation of obtaining ACL (win).

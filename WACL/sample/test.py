@@ -1,4 +1,4 @@
-from core.report import AclGt
+from WACL.core.report import AclGt
 
 def test_save_excel_PER1():
     aclGt = AclGt()

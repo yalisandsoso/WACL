@@ -8,7 +8,6 @@ from openpyxl import Workbook
 from openpyxl.styles import Alignment, Border, Font, Side, borders, colors, PatternFill
 from openpyxl.utils import get_column_letter
 
-
 class Aclmat:
     """
         The format when recoding 'aclfile' to the '.xlsx' file
